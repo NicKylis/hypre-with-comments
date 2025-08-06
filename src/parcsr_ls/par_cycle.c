@@ -17,6 +17,64 @@
 
 /*--------------------------------------------------------------------------
  * hypre_BoomerAMGCycle
+ *
+ *                  ###Comment from NicKylis on github###
+ *
+ * The following function is implementing one cycle of the BoomerAMG solver.
+ * The cycle begins on level 0, then progresses towards level N and drops
+ * back to level 0. The levels are designed as follows:
+ * Level 0 (finest)
+ * |
+ * |-- Relaxation (pre-smoothing)
+ * |
+ * |-- Compute Residual: r = F - A*U
+ * |
+ * |-- Restrict Residual (R * r) ➡ F_array[1]
+ * |
+ * v
+ * Level 1
+ * |
+ * |-- Relaxation
+ * |
+ * |-- Compute Residual
+ * |
+ * |-- Restrict ➡ F_array[2]
+ * |
+ * v
+ * Level 2
+ * |
+ * |-- Relaxation
+ * |
+ * |-- ...
+ * |
+ * v
+ * Level N (coarsest)
+ * |
+ * |-- Coarse Solve (direct or approximate)
+ * |
+ * v
+ * ⬆ Return from Coarse Grid
+ * |
+ * |-- Interpolate Correction (P * U_coarse)
+ * |
+ * |-- Add Correction ➕ to U_fine
+ * |
+ * |-- Relaxation (post-smoothing)
+ * |
+ * v
+ * Level N-1
+ * |
+ * |-- Interpolate Correction
+ * |
+ * |-- Relaxation
+ * |
+ * v
+ *  ...
+ * |
+ * v
+ * Level 0
+ * |
+ * |-- Final Correction (post-smoothing)
  *--------------------------------------------------------------------------*/
 
 HYPRE_Int
