@@ -480,6 +480,12 @@ hypre_ParCSRRelax_Cheby_Solve(hypre_ParCSRMatrix *A, /* matrix to relax with */
       return hypre_error_flag;
    }
 
+/* ---------------------------------------------------------------------------------
+ * This check is for CUDA or SYCL usage. CUDA -> NVIDIA, HIPS -> AMD, SYCL -> INTEL
+ * You can find the GPU implementation in the par_cheby_device.c file.
+ * The GPU implementation currently supports CUDA and SYCL (NOT HIPS)
+ * (NicKylis)
+ * ---------------------------------------------------------------------------------*/
 #if defined(HYPRE_USING_GPU)
    HYPRE_ExecutionPolicy exec = hypre_GetExecPolicy1(hypre_ParCSRMatrixMemoryLocation(A));
    if (exec == HYPRE_EXEC_DEVICE)

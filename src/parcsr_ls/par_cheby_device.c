@@ -174,6 +174,7 @@ hypre_ParCSRRelax_Cheby_SolveDevice(hypre_ParCSRMatrix *A, /* matrix to relax wi
                                         r_data + num_rows),
          save_and_scale<HYPRE_Real>(coefs[cheby_order]));
 #else
+      /* Thrust is an NVIDIA library within CUDA that optimizes basic operations (NicKylis) */
       HYPRE_THRUST_CALL(
          for_each,
          thrust::make_zip_iterator(thrust::make_tuple(orig_u, u_data, r_data)),
