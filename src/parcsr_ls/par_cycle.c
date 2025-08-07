@@ -82,6 +82,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                       hypre_ParVector  **F_array,
                       hypre_ParVector  **U_array   )
 {
+   /* Memory allocation for all the data (NicKylis) */
    hypre_ParAMGData *amg_data = (hypre_ParAMGData*) amg_vdata;
 
    HYPRE_Solver *smoother;
@@ -287,6 +288,13 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
 
    if (smooth_num_levels > 0)
    {
+      /* -------------------------------------------------------------
+       * Jacobi, l1-Jacobi, Pilut, ParaSails and the rest undocumented
+       * (possibly GE-style relaxation variants)
+       * Should be mentioned that smoothers with value > 10 are mostly
+       * undocumented (possibly in developement)
+       * (NicKylis)
+       * ------------------------------------------------------------- */
       if (smooth_type == 7  || smooth_type == 8  || smooth_type == 9 ||
           smooth_type == 17 || smooth_type == 18 || smooth_type == 19)
       {
@@ -343,6 +351,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
    hypre_GpuProfilingPushRange(nvtx_name);
    while (Not_Finished)
    {
+      /* If not on level 0 or 1 (NicKylis) */
       if (num_levels > 1)
       {
          local_size = hypre_VectorSize(hypre_ParVectorLocalVector(F_array[level]));
@@ -355,6 +364,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
             Aux_U = U_array[level];
             Aux_F = F_array[level];
          }
+         /* Smooth types: variations of GS, CG, Chebysev, Jacobi */
          else if (smooth_type > 9)
          {
             hypre_ParVectorSetLocalSize(Ztemp, local_size);
@@ -500,6 +510,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   beta = 1.0;
                   hypre_ParCSRMatrixMatvecOutOfPlace(alpha, A_array[level],
                                                      U_array[level], beta, Aux_F, Vtemp);
+                  /* Pilut (NicKylis) */
                   if (smooth_type == 7 || smooth_type == 17)
                   {
                      HYPRE_ParCSRPilutSolve(smoother[level],
@@ -507,6 +518,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                             (HYPRE_ParVector) Vtemp,
                                             (HYPRE_ParVector) Utemp);
                   }
+                  /* ParaSails (NicKylis) */
                   else if (smooth_type == 8 || smooth_type == 18)
                   {
                      HYPRE_ParCSRParaSailsSolve(smoother[level],
@@ -514,6 +526,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                 (HYPRE_ParVector) Vtemp,
                                                 (HYPRE_ParVector) Utemp);
                   }
+                  /* Euclid (NicKylis) */
                   else if (smooth_type == 9 || smooth_type == 19)
                   {
                      HYPRE_EuclidSolve(smoother[level],
@@ -523,6 +536,8 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                   }
                   hypre_ParVectorAxpy(relax_weight[level], Utemp, Aux_U);
                }
+               /* Special case for FSAI that forces 0 guess
+                *(more smooth levels than the index of CURRENT cycle level) (NicKylis) */
                else if ( smooth_num_levels > level && (smooth_type == 4) )
                {
                   HYPRE_FSAISetZeroGuess(smoother[level], cycle_param - 2);
@@ -532,6 +547,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                   (HYPRE_ParVector) Aux_F,
                                   (HYPRE_ParVector) Aux_U);
                }
+               /* Parallel Incomplete LU with level of fill -k (NicKylis) */
                else if ( smooth_num_levels > level && (smooth_type == 5 || smooth_type == 15) )
                {
                   HYPRE_ILUSolve(smoother[level],
@@ -539,6 +555,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                  (HYPRE_ParVector) Aux_F,
                                  (HYPRE_ParVector) Aux_U);
                }
+               /* Schwarz Domain Decomposition (NicKylis) */
                else if ( smooth_num_levels > level && (smooth_type == 6 || smooth_type == 16) )
                {
                   HYPRE_SchwarzSolve(smoother[level],
@@ -594,6 +611,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                 cheby_order, scale,
                                                 variant, Aux_U, Vtemp, Ztemp, Ptemp, Rtemp );
                }
+               /* 17 -> FCF Jacobi BUT when on coarsest level use one sweep regular Jacobi (NicKylis) */
                else if (relax_type == 17)
                {
                   if (level == num_levels - 1)
@@ -610,6 +628,7 @@ hypre_BoomerAMGCycle( void              *amg_vdata,
                                                     Aux_U, Vtemp);
                   }
                }
+               /* Old version referes to 19 -> Gaussian Elimination on Coarsest Level (Direct Method) (NicKylis) */
                else if (old_version)
                {
                   Solve_err_flag = hypre_BoomerAMGRelax(A_array[level],
