@@ -429,7 +429,8 @@ hypre_PCGSolve( void *pcg_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF
+         CAN STILL BE FOUND in August, 2025 on the same link (NicKylis) */
       if (print_level > 0 || logging > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
@@ -507,7 +508,8 @@ hypre_PCGSolve( void *pcg_vdata,
          for ieee_check self-equality works on all IEEE-compliant compilers/
          machines, c.f. page 8 of "Lecture Notes on the Status of IEEE 754"
          by W. Kahan, May 31, 1996.  Currently (July 2002) this paper may be
-         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF */
+         found at https://people.eecs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF
+         CAN STILL BE FOUND in August, 2025 on the same link (NicKylis) */
       if (print_level > 0 || logging > 0)
       {
          hypre_printf("\n\nERROR detected by Hypre ...  BEGIN\n");
