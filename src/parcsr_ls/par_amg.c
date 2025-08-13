@@ -3778,6 +3778,7 @@ hypre_BoomerAMGSetNumPoints( void     *data,
    return hypre_error_flag;
 }
 
+// This function can lead to MPI errors because of IntArrayDestroy if not handled properly (NicKylis)
 HYPRE_Int
 hypre_BoomerAMGSetDofFunc( void                 *data,
                            HYPRE_Int            *dof_func)
